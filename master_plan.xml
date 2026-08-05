@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<masterplan project="qwen05b-support-showcase">
+
+  <goal>
+    FastAPI backend serving fine-tuned Qwen2.5-0.5B support model.
+    Landing page frontend showing model capability (metrics + figures).
+    Floating chat icon (bottom-right) opens chatbox wired to model via API.
+  </goal>
+
+  <assets>
+    <model path="results/qwen05b-support-merged" note="merged weights, load direct, no peft needed at inference"/>
+    <metrics path="results/figures/summary_metrics.json" note="base vs fine_tuned: rouge/bleu/intent_acc/perplexity"/>
+    <figures dir="results/figures" note="11 PNGs: loss curve, accuracy, confusion matrix, base-vs-finetuned etc"/>
+    <samples path="results/figures/generations.csv" note="instruction/response/pred_finetuned/pred_base examples"/>
+  </assets>
+
+  <stack>
+    <backend>FastAPI + uvicorn + transformers (torch already installed)</backend>
+    <frontend>vanilla HTML/CSS/JS, no build step, served as static files by FastAPI</frontend>
+    <reason>single small model, single page -&gt; no framework/bundler needed (ladder rung 4)</reason>
+  </stack>
+
+  <layout>
+    <dir path="app/">
+      <file>main.py — FastAPI app, mounts static, defines routes</file>
+      <file>model.py — load merged model once at startup, generate() fn</file>
+    </dir>
+    <dir path="static/">
+      <file>index.html — landing page + chat widget markup</file>
+      <file>style.css — layout, chat widget styling</file>
+      <file>app.js — fetch metrics/figures, chat widget logic</file>
+    </dir>
+    <file>requirements.txt</file>
+  </layout>
+
+  <phases>
+
+    <phase id="1" name="backend-core">
+      <task>requirements.txt: fastapi, uvicorn, transformers, accelerate</task>
+      <task>app/model.py: load tokenizer+model from results/qwen05b-support-merged at import time, apply chat_template, generate() with generation_config defaults (temp 0.7, top_p 0.8, top_k 20, rep_penalty 1.1)</task>
+      <task>app/main.py: GET /api/metrics -&gt; summary_metrics.json contents</task>
+      <task>app/main.py: GET /api/figures -&gt; list figure filenames; mount /figures as StaticFiles(results/figures)</task>
+      <task>app/main.py: POST /api/chat {message} -&gt; {reply} using model.generate()</task>
+      <task>app/main.py: mount /static, serve index.html at "/"</task>
+    </phase>
+
+    <phase id="2" name="landing-page">
+      <task>index.html hero section: model name, one-line description</task>
+      <task>metrics section: cards for intent_accuracy, rouge/bleu, perplexity — base vs fine-tuned, pulled via fetch('/api/metrics')</task>
+      <task>figures gallery: grid of images from /figures, lazy load</task>
+      <task>style.css: clean minimal layout, responsive grid</task>
+    </phase>
+
+    <phase id="3" name="chat-widget">
+      <task>fixed circular message icon, bottom-right, z-index top</task>
+      <task>click toggles chatbox panel (message list + input + send)</task>
+      <task>app.js: POST to /api/chat, append user+model bubbles, basic loading state</task>
+    </phase>
+
+    <phase id="4" name="verify">
+      <task>run uvicorn, curl /api/metrics and /api/chat</task>
+      <task>open in browser, test chat + gallery render</task>
+      <task>self-check: minimal script or curl-based smoke test for /api/chat</task>
+    </phase>
+
+  </phases>
+
+  <out_of_scope>
+    <item>auth, multi-user sessions, chat history persistence</item>
+    <item>streaming tokens (plain request/response first; add SSE later if asked)</item>
+    <item>frontend framework/build tooling</item>
+  </out_of_scope>
+
+</masterplan>

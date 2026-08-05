@@ -1,0 +1,11 @@
+metric,base,fine_tuned
+eval loss,,0.611
+perplexity,,1.843
+token accuracy %,,80.526
+ROUGE-1,32.692,58.813
+ROUGE-2,8.025,31.502
+ROUGE-L,18.144,41.891
+BLEU,5.593,30.597
+intent accuracy %,58.0,98.0
+intent macro-F1,56.641,97.979
+length ratio,0.878,0.913

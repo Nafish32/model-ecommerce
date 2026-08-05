@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+server.log
+
+# large model weights and raw archive — too big for a normal git push
+results.zip
+results/qwen05b-support-merged/model.safetensors

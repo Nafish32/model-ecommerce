@@ -1,0 +1,29 @@
+{
+  "trainer": {
+    "eval_loss": 0.611183226108551,
+    "eval_token_accuracy": 0.8052627457122719,
+    "perplexity": 1.8426103340960358
+  },
+  "base": {
+    "rouge1": 32.691648842128174,
+    "rouge2": 8.024678008273138,
+    "rougeL": 18.14382022849978,
+    "bleu": 5.592627551853265,
+    "len_ratio": 0.8779896343492939,
+    "intent_accuracy": 57.99999999999999,
+    "intent_macro_f1": 56.6408926553854
+  },
+  "fine_tuned": {
+    "rouge1": 58.81295475162426,
+    "rouge2": 31.50234207979971,
+    "rougeL": 41.891196984209934,
+    "bleu": 30.597319466424413,
+    "len_ratio": 0.9127002995577955,
+    "intent_accuracy": 98.0,
+    "intent_macro_f1": 97.97912992357438
+  },
+  "probe_ceiling_accuracy": 100.0,
+  "n_train": 26361,
+  "n_eval": 511,
+  "n_generated": 200
+}

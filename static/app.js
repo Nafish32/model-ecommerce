@@ -1,12 +1,3 @@
-const PRODUCTS = [
-  { name: "Wireless Earbuds", price: 59.99 },
-  { name: "Smart Watch", price: 129.99 },
-  { name: "Canvas Backpack", price: 45.0 },
-  { name: "Running Sneakers", price: 89.99 },
-  { name: "Desk Lamp", price: 24.99 },
-  { name: "Ceramic Mug", price: 12.99 },
-];
-
 const BOX_ICON = `
   <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5">
     <path d="M21 8l-9-5-9 5 9 5 9-5z"></path>
@@ -14,26 +5,44 @@ const BOX_ICON = `
     <path d="M12 13v8"></path>
   </svg>`;
 
-let cartCount = 0;
+const cart = []; // {name, price, qty}
 
-function renderProducts() {
+function addToCart(product) {
+  const existing = cart.find((i) => i.name === product.name);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ name: product.name, price: product.price, qty: 1 });
+  }
+  const count = cart.reduce((sum, i) => sum + i.qty, 0);
+  const badge = document.getElementById("cart-count");
+  badge.textContent = count;
+  badge.classList.remove("hidden");
+}
+
+async function renderProducts() {
+  const res = await fetch("/api/products");
+  const products = await res.json();
   const grid = document.getElementById("product-grid");
-  for (const p of PRODUCTS) {
+
+  for (const p of products) {
     const card = document.createElement("div");
     card.className = "product-card";
     card.innerHTML = `
       <div class="product-thumb">${BOX_ICON}</div>
       <div class="product-info">
+        <span class="category">${p.category}</span>
         <h3>${p.name}</h3>
+        <p class="desc">${p.description}</p>
         <p class="price">$${p.price.toFixed(2)}</p>
-        <button class="btn-add">Add to cart</button>
+        <button class="btn-add" ${p.in_stock ? "" : "disabled"}>
+          ${p.in_stock ? "Add to cart" : "Out of stock"}
+        </button>
       </div>`;
-    card.querySelector(".btn-add").addEventListener("click", () => {
-      cartCount += 1;
-      const badge = document.getElementById("cart-count");
-      badge.textContent = cartCount;
-      badge.classList.remove("hidden");
-    });
+    const btn = card.querySelector(".btn-add");
+    if (p.in_stock) {
+      btn.addEventListener("click", () => addToCart(p));
+    }
     grid.appendChild(card);
   }
 }
@@ -100,7 +109,7 @@ function initChat() {
   toggle.addEventListener("click", () => {
     panel.classList.toggle("hidden");
     if (!greeted && !panel.classList.contains("hidden")) {
-      addMessage("Hi! I can help with orders, refunds, and shipping questions.", "bot");
+      addMessage("Hi! Ask me about product prices, stock, or orders and refunds.", "bot");
       greeted = true;
     }
   });
@@ -143,7 +152,86 @@ function initChat() {
   });
 }
 
+function initCart() {
+  const cartBtn = document.getElementById("cart-btn");
+  const panel = document.getElementById("cart-panel");
+  const closeBtn = document.getElementById("cart-close");
+  const itemsEl = document.getElementById("cart-items");
+  const totalEl = document.getElementById("cart-total");
+  const confirmBtn = document.getElementById("cart-confirm");
+  const resultEl = document.getElementById("order-result");
+  const cancelIdInput = document.getElementById("cancel-order-id");
+  const cancelBtn = document.getElementById("cancel-order-btn");
+
+  function renderCart() {
+    itemsEl.innerHTML = "";
+    if (cart.length === 0) {
+      itemsEl.innerHTML = `<p class="cart-empty">Your cart is empty.</p>`;
+    }
+    let total = 0;
+    for (const item of cart) {
+      const subtotal = item.price * item.qty;
+      total += subtotal;
+      const row = document.createElement("div");
+      row.className = "cart-row";
+      row.innerHTML = `
+        <span>${item.name} &times; ${item.qty}</span>
+        <span>$${subtotal.toFixed(2)}</span>`;
+      itemsEl.appendChild(row);
+    }
+    totalEl.textContent = `Total: $${total.toFixed(2)}`;
+    confirmBtn.disabled = cart.length === 0;
+    return total;
+  }
+
+  cartBtn.addEventListener("click", () => {
+    panel.classList.toggle("hidden");
+    if (!panel.classList.contains("hidden")) renderCart();
+  });
+  closeBtn.addEventListener("click", () => panel.classList.add("hidden"));
+
+  confirmBtn.addEventListener("click", async () => {
+    const total = renderCart();
+    if (cart.length === 0) return;
+    confirmBtn.disabled = true;
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: cart, total }),
+      });
+      const order = await res.json();
+      resultEl.textContent = `Order #${order.id} confirmed. Save this number to cancel it later.`;
+      resultEl.className = "order-ok";
+      cart.length = 0;
+      document.getElementById("cart-count").classList.add("hidden");
+      renderCart();
+    } catch (err) {
+      resultEl.textContent = "Could not place order.";
+      resultEl.className = "order-error";
+    } finally {
+      confirmBtn.disabled = cart.length === 0;
+    }
+  });
+
+  cancelBtn.addEventListener("click", async () => {
+    const id = cancelIdInput.value.trim();
+    if (!id) return;
+    try {
+      const res = await fetch(`/api/orders/${id}/cancel`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const order = await res.json();
+      resultEl.textContent = `Order #${order.id} is now ${order.status}.`;
+      resultEl.className = "order-ok";
+    } catch (err) {
+      resultEl.textContent = `Order #${id} not found.`;
+      resultEl.className = "order-error";
+    }
+  });
+}
+
 renderProducts();
 loadMetrics();
 loadFigures();
 initChat();
+initCart();

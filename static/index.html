@@ -25,6 +25,21 @@
   </button>
 </header>
 
+<div id="cart-panel" class="hidden">
+  <div class="cart-header">
+    <span>Your Cart</span>
+    <button id="cart-close" aria-label="Close cart">&times;</button>
+  </div>
+  <div id="cart-items"></div>
+  <div id="cart-total" class="cart-total"></div>
+  <button id="cart-confirm" class="btn-primary-block">Confirm Order</button>
+  <div id="order-result"></div>
+  <div class="cancel-order">
+    <input id="cancel-order-id" type="number" min="1" placeholder="Order #">
+    <button id="cancel-order-btn">Cancel Order</button>
+  </div>
+</div>
+
 <section class="hero">
   <h1>Everyday gear, well made.</h1>
   <p>Free shipping over $50. Questions? Our support assistant is one click away.</p>

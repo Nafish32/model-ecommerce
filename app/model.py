@@ -3,7 +3,16 @@ from pathlib import Path
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from app.products import catalog_context
+
 MODEL_DIR = Path(__file__).resolve().parent.parent / "results" / "qwen05b-support-merged"
+
+SYSTEM_PROMPT = (
+    "You are the customer support assistant for Nova Goods, an online store. "
+    "Answer questions about product price, category, and availability using the "
+    "catalog below. For general support questions (orders, refunds, shipping, "
+    "returns), answer normally.\n\n" + catalog_context()
+)
 
 _tokenizer = None
 _model = None
@@ -21,7 +30,10 @@ def load():
 
 def generate(message: str, max_new_tokens: int = 256) -> str:
     load()
-    messages = [{"role": "user", "content": message}]
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": message},
+    ]
     inputs = _tokenizer.apply_chat_template(
         messages, add_generation_prompt=True, return_tensors="pt", return_dict=True
     )

@@ -288,6 +288,7 @@ function initCart() {
   }
 
   cartBtn.addEventListener("click", () => {
+    document.getElementById("orders-panel").classList.add("hidden"); // shares cart's fixed slot
     panel.classList.toggle("hidden");
     if (!panel.classList.contains("hidden")) renderCart();
   });
@@ -391,6 +392,7 @@ function initOrders() {
   });
 
   btn.addEventListener("click", () => {
+    document.getElementById("cart-panel").classList.add("hidden"); // same fixed slot as cart
     panel.classList.toggle("hidden");
     if (!panel.classList.contains("hidden")) loadOrders();
   });

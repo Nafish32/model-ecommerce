@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova Goods — Admin</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Login gate -->
+  <section id="login" class="login-wrap hidden">
+    <form id="login-form" class="login-card">
+      <h1>Admin Login</h1>
+      <input id="login-email" type="email" placeholder="Email" autocomplete="username" required>
+      <input id="login-password" type="password" placeholder="Password" autocomplete="current-password" required>
+      <button type="submit">Sign in</button>
+      <p id="login-error" class="login-error"></p>
+    </form>
+  </section>
+
+  <!-- Admin app -->
+  <div id="admin" class="hidden">
+    <header class="admin-top">
+      <strong>Nova Goods Admin</strong>
+      <nav>
+        <a href="#dashboard" data-view="dashboard">Dashboard</a>
+        <a href="#reviews" data-view="reviews">Reviews</a>
+      </nav>
+      <button id="logout-btn">Log out</button>
+    </header>
+
+    <main class="admin-main">
+      <!-- Dashboard -->
+      <section id="view-dashboard">
+        <div id="stat-cards" class="stat-cards"></div>
+        <div class="chart-row">
+          <div class="chart-box">
+            <h2>Order status</h2>
+            <div id="status-chart"></div>
+          </div>
+          <div class="chart-box chart-link" id="sentiment-card" title="Open reviews">
+            <h2>Review sentiment <span class="hint">→ details</span></h2>
+            <div id="sentiment-chart"></div>
+          </div>
+        </div>
+        <h2>Orders</h2>
+        <div class="table-wrap"><table id="orders-table"></table></div>
+      </section>
+
+      <!-- Reviews -->
+      <section id="view-reviews" class="hidden">
+        <h2>Product reviews &amp; sentiment</h2>
+        <p class="muted">Click a column header to sort.</p>
+        <div class="table-wrap"><table id="reviews-table"></table></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/admin.js"></script>
+</body>
+</html>

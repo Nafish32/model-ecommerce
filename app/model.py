@@ -7,11 +7,16 @@ from app.products import catalog_context
 
 MODEL_DIR = Path(__file__).resolve().parent.parent / "results" / "qwen05b-support-merged"
 
-SYSTEM_PROMPT = (
+REFUSAL = "I can only help with Nova Goods products, orders, and support."
+
+SYSTEM_PREAMBLE = (
     "You are the customer support assistant for Nova Goods, an online store. "
-    "Answer questions about product price, category, and availability using the "
-    "catalog below. For general support questions (orders, refunds, shipping, "
-    "returns), answer normally.\n\n" + catalog_context()
+    "Recommend and answer questions about products using ONLY the catalog items "
+    "below. Do not invent products, prices, or stock status. If nothing fits, say "
+    "so. For general support (orders, refunds, shipping, returns), answer normally.\n"
+    "Stay strictly on topic: Nova Goods products, orders, and support. If the user "
+    "asks about anything else (general knowledge, trivia, coding, world facts, other "
+    f'companies), do NOT answer it. Reply with exactly: "{REFUSAL}"'
 )
 
 _tokenizer = None
@@ -28,12 +33,13 @@ def load():
     _model.eval()
 
 
-def generate(message: str, max_new_tokens: int = 256) -> str:
+def generate(message: str, context: list[dict] | None = None,
+             history: list[dict] | None = None, max_new_tokens: int = 256) -> str:
     load()
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": message},
-    ]
+    system = SYSTEM_PREAMBLE + "\n\n" + catalog_context(context)
+    messages = [{"role": "system", "content": system}]
+    messages += history or []
+    messages.append({"role": "user", "content": message})
     inputs = _tokenizer.apply_chat_template(
         messages, add_generation_prompt=True, return_tensors="pt", return_dict=True
     )

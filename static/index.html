@@ -15,6 +15,9 @@
     <a href="#about">About</a>
     <a href="#support">Support</a>
   </nav>
+  <span id="user-email" class="user-email hidden"></span>
+  <button id="orders-btn" class="auth-btn hidden">My Orders</button>
+  <button id="auth-btn" class="auth-btn">Log in</button>
   <button id="cart-btn" aria-label="Cart">
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="9" cy="21" r="1"></circle>
@@ -25,6 +28,45 @@
   </button>
 </header>
 
+<div id="login-overlay" class="modal-overlay hidden">
+  <form id="storefront-login" class="login-card">
+    <button type="button" id="login-modal-close" class="modal-close" aria-label="Close">&times;</button>
+    <h1>Log in to shop</h1>
+    <p class="login-hint">You need an account to add items to your cart.</p>
+    <input id="sf-email" type="email" placeholder="Email" autocomplete="username" required>
+    <input id="sf-password" type="password" placeholder="Password" autocomplete="current-password" required>
+    <button type="submit">Log in</button>
+    <p id="sf-login-error" class="login-error"></p>
+  </form>
+</div>
+
+<div id="orders-panel" class="hidden">
+  <div class="cart-header">
+    <span>My Orders</span>
+    <button id="orders-close" aria-label="Close orders">&times;</button>
+  </div>
+  <div id="orders-list"></div>
+</div>
+
+<div id="review-overlay" class="modal-overlay hidden">
+  <form id="review-form" class="login-card">
+    <button type="button" id="review-close" class="modal-close" aria-label="Close">&times;</button>
+    <h1>Review <span id="review-product"></span></h1>
+    <label class="review-label">Rating
+      <select id="review-rating">
+        <option value="5">★★★★★ (5)</option>
+        <option value="4">★★★★ (4)</option>
+        <option value="3">★★★ (3)</option>
+        <option value="2">★★ (2)</option>
+        <option value="1">★ (1)</option>
+      </select>
+    </label>
+    <textarea id="review-text" rows="4" placeholder="How was it?" required></textarea>
+    <button type="submit">Submit review</button>
+    <p id="review-error" class="login-error"></p>
+  </form>
+</div>
+
 <div id="cart-panel" class="hidden">
   <div class="cart-header">
     <span>Your Cart</span>
@@ -34,10 +76,6 @@
   <div id="cart-total" class="cart-total"></div>
   <button id="cart-confirm" class="btn-primary-block">Confirm Order</button>
   <div id="order-result"></div>
-  <div class="cancel-order">
-    <input id="cancel-order-id" type="number" min="1" placeholder="Order #">
-    <button id="cancel-order-btn">Cancel Order</button>
-  </div>
 </div>
 
 <section class="hero">
